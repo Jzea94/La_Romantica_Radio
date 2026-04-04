@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* 1. Definición del Tema (Sustituye a :root y tailwind.config.js) */
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Colores de Lovable / shadcn */
+  --color-background: hsl(240 10% 4%);
+  --color-foreground: hsl(0 0% 95%);
+  --color-card: hsl(240 6% 10%);
+  --color-card-foreground: hsl(0 0% 95%);
+  --color-primary: hsl(330 100% 60%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-border: hsl(240 6% 20%);
+  --color-muted: hsl(240 5% 18%);
+  --color-muted-foreground: hsl(240 5% 55%);
+  --color-accent: hsl(280 100% 65%);
+  
+  /* Variables personalizadas para la radio */
+  --color-glass-border: hsl(240 6% 25%);
+  --neon-glow-color: hsl(330 100% 60%);
+}
+
+/* 2. Estilos Base */
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+}
+
+/* 3. Utilidades Personalizadas (Aquí vive la magia visual) */
+@utility glass {
+  @apply bg-card/60 backdrop-blur-xl border border-glass-border rounded-b-xl;
+}
+
+@utility neon-glow {
+  box-shadow: 0 0 20px var(--neon-glow-color), 0 0 60px color-mix(in srgb, var(--neon-glow-color) 10%, transparent);
+}
+
+@utility neon-text {
+  text-shadow: 0 0 10px var(--neon-glow-color), 0 0 40px color-mix(in srgb, var(--neon-glow-color) 20%, transparent);
+}
