@@ -37,7 +37,7 @@
 
 /* 3. Utilidades Personalizadas (Aquí vive la magia visual) */
 @utility glass {
-  @apply bg-card/60 backdrop-blur-xl border border-glass-border rounded-b-xl;
+  @apply bg-card/60 backdrop-blur-xl border border-glass-border rounded-xl;
 }
 
 @utility neon-glow {
@@ -46,4 +46,23 @@
 
 @utility neon-text {
   text-shadow: 0 0 10px var(--neon-glow-color), 0 0 40px color-mix(in srgb, var(--neon-glow-color) 20%, transparent);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(0); } /* Pausa inicial */
+  90% { transform: translateX(-100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 10s linear infinite;
+  /* El padding asegura que el texto no se pegue al final */
+  padding-right: 2rem;
+}
+
+.pause-marquee:hover {
+  animation-play-state: paused;
 }

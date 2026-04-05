@@ -14,9 +14,9 @@ const AudioPlayer = ({ streamUrl }) => {
   const audioRef = useRef(null);
   const streamId = streamUrl.split('/').pop();
 
-  // Lógica de Metadatos mediante Server-Sent Events (SSE)
+  // Metadatos via Server-Sent Events (SSE)
+  // https://api.zeno.fm/mounts/metadata/subscribe/qhefwzwt8qetv
   useEffect(() => {
-    // Usamos el endpoint /subscribe/ según la documentación de Zeno
     const sseUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
     const eventSource = new EventSource(sseUrl);
 
@@ -36,7 +36,6 @@ const AudioPlayer = ({ streamUrl }) => {
     };
 
     eventSource.onerror = () => {
-      console.warn("Conexión SSE perdida. Reintentando...");
       eventSource.close();
     };
 
@@ -77,44 +76,57 @@ const AudioPlayer = ({ streamUrl }) => {
   };
 
   return (
-    <div className="glass border border-white/10 p-4 rounded-2xl flex items-center justify-between max-w-4xl mx-auto shadow-2xl backdrop-blur-md">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={togglePlay}
-          className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,46,126,0.4)]"
-        >
-          {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
-        </button>
+    <div className="glass border border-white/10 p-4 rounded-2xl shadow-2xl backdrop-blur-md max-w-4xl mx-auto w-full">
+      {/* Grid de 3 columnas: [Botón (fijo) | Info (flexible) | Volumen (fijo)] */}
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
         
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            {isPlaying && (
-              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-            )}
-            <p className="text-sm font-bold neon-text truncate">
-              {trackInfo.title}
+        {/* COLUMNA 1: Play/Pause */}
+        <div className="flex-shrink-0">
+          <button 
+            onClick={togglePlay}
+            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,46,126,0.4)]"
+          >
+            {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
+          </button>
+        </div>
+
+        {/* COLUMNA 2: Info de Canción con Efecto Marquee */}
+        <div className="min-w-0 overflow-hidden relative">
+          <div className="flex flex-col justify-center h-full">
+            <div className="flex items-center gap-2 mb-0.5 whitespace-nowrap overflow-hidden">
+              {isPlaying && (
+                <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary animate-pulse" />
+              )}
+              {/* Contenedor del título animado */}
+              <div className="overflow-hidden relative w-full">
+                <p className="inline-block text-sm font-bold neon-text animate-marquee hover:pause-marquee">
+                  {trackInfo.title}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground truncate italic">
+              {trackInfo.artist}
             </p>
           </div>
-          <p className="text-xs text-muted-foreground truncate italic">
-            {trackInfo.artist}
-          </p>
         </div>
-      </div>
 
-      <div className="flex items-center gap-4 w-32 md:w-48 ml-4">
-        <button 
-          onClick={toggleMute}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {isMuted || volume[0] === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        </button>
-        <Slider 
-          value={isMuted ? [0] : volume} 
-          onValueChange={handleVolume} 
-          max={100} 
-          step={1} 
-          className="cursor-pointer"
-        />
+        {/* COLUMNA 3: Control de Volumen */}
+        <div className="flex items-center gap-3 w-[120px] md:w-[160px] flex-shrink-0">
+          <button 
+            onClick={toggleMute}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isMuted || volume[0] === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </button>
+          <Slider 
+            value={isMuted ? [0] : volume} 
+            onValueChange={handleVolume} 
+            max={100} 
+            step={1} 
+            className="cursor-pointer"
+          />
+        </div>
+
       </div>
     </div>
   );
