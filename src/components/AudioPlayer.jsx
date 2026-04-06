@@ -6,20 +6,37 @@ const AudioPlayer = ({ streamUrl }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState([80]);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
   const [trackInfo, setTrackInfo] = useState({
     title: "Salsa Romántica FM",
     artist: "En Vivo 24/7"
   });
-  
+
+  // Detección de iPhone (iOS bloquea el control de volumen por software)
+  const isIPhone = typeof window !== 'undefined' && /iPhone/.test(navigator.userAgent);
+
   const audioRef = useRef(null);
+  const titleRef = useRef(null);
+  const containerRef = useRef(null);
   const streamId = streamUrl.split('/').pop();
 
-  // Metadatos via Server-Sent Events (SSE)
-  // https://api.zeno.fm/mounts/metadata/subscribe/qhefwzwt8qetv
+  // 1. Detección de desbordamiento para el Marquee
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (titleRef.current && containerRef.current) {
+        const isOverflowing = titleRef.current.scrollWidth > containerRef.current.offsetWidth;
+        setShouldAnimate(isOverflowing);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [trackInfo.title]);
+
+  // 2. Metadatos via Zeno FM (SSE)
   useEffect(() => {
     const sseUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
     const eventSource = new EventSource(sseUrl);
-
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -34,19 +51,15 @@ const AudioPlayer = ({ streamUrl }) => {
         console.error("Error al procesar metadatos:", err);
       }
     };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
-
+    eventSource.onerror = () => eventSource.close();
     return () => eventSource.close();
   }, [streamId]);
 
+  // 3. Lógica de Audio
   const togglePlay = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio(streamUrl);
     }
-
     if (isPlaying) {
       audioRef.current.pause();
       audioRef.current.src = ""; 
@@ -54,7 +67,8 @@ const AudioPlayer = ({ streamUrl }) => {
       setIsPlaying(false);
     } else {
       audioRef.current.src = streamUrl;
-      audioRef.current.volume = isMuted ? 0 : volume[0] / 100;
+      // En iPhone, el volumen siempre es 1 (control físico obligatorio)
+      audioRef.current.volume = isIPhone ? 1 : (isMuted ? 0 : volume[0] / 100);
       audioRef.current.play().catch(console.error);
       setIsPlaying(true);
     }
@@ -64,20 +78,23 @@ const AudioPlayer = ({ streamUrl }) => {
     setVolume(newVal);
     const muted = newVal[0] === 0;
     setIsMuted(muted);
-    if (audioRef.current) audioRef.current.volume = muted ? 0 : newVal[0] / 100;
+    if (audioRef.current && !isIPhone) {
+      audioRef.current.volume = muted ? 0 : newVal[0] / 100;
+    }
   };
 
   const toggleMute = () => {
     const nextMute = !isMuted;
     setIsMuted(nextMute);
     if (audioRef.current) {
-      audioRef.current.volume = nextMute ? 0 : volume[0] / 100;
+      // El iPhone sí respeta la propiedad .muted aunque bloquee el .volume
+      audioRef.current.muted = nextMute;
+      if (!isIPhone) audioRef.current.volume = nextMute ? 0 : volume[0] / 100;
     }
   };
 
   return (
-    <div className="glass border border-white/10 p-4 rounded-2xl shadow-2xl backdrop-blur-md max-w-4xl mx-auto w-full">
-      {/* Grid de 3 columnas: [Botón (fijo) | Info (flexible) | Volumen (fijo)] */}
+    <div className="glass border rounded-xl p-4 shadow-2xl backdrop-blur-md max-w-4xl mx-auto w-full">
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
         
         {/* COLUMNA 1: Play/Pause */}
@@ -90,41 +107,52 @@ const AudioPlayer = ({ streamUrl }) => {
           </button>
         </div>
 
-        {/* COLUMNA 2: Info de Canción con Efecto Marquee */}
-        <div className="min-w-0 overflow-hidden relative">
-          <div className="flex flex-col justify-center h-full">
-            <div className="flex items-center gap-2 mb-0.5 whitespace-nowrap overflow-hidden">
-              {isPlaying && (
-                <span className="flex-shrink-0 h-2 w-2 rounded-full bg-primary animate-pulse" />
-              )}
-              {/* Contenedor del título animado */}
-              <div className="overflow-hidden relative w-full">
-                <p className="inline-block text-sm font-bold neon-text animate-marquee hover:pause-marquee">
-                  {trackInfo.title}
-                </p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground truncate italic">
-              {trackInfo.artist}
+        {/* COLUMNA 2: Info de la canción */}
+        <div className="min-w-0 flex flex-col justify-center space-y-0.5">
+          <div className="overflow-hidden relative w-full" ref={containerRef}>
+            <p 
+              ref={titleRef}
+              className={`inline-block text-sm font-bold neon-text whitespace-nowrap ${
+                shouldAnimate ? "animate-marquee hover:pause-marquee" : ""
+              }`}
+            >
+              {trackInfo.title}
             </p>
+          </div>
+          <p className="text-xs text-muted-foreground truncate italic">
+            {trackInfo.artist}
+          </p>
+          <div className="h-4 mt-1">
+            {isPlaying && (
+              <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#ff2e7e]" />
+                <span className="text-[10px] uppercase tracking-wider font-medium text-primary/80">
+                  En vivo
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* COLUMNA 3: Control de Volumen */}
-        <div className="flex items-center gap-3 w-[120px] md:w-[160px] flex-shrink-0">
+        {/* COLUMNA 3: Volumen (Oculta slider en iPhone) */}
+        <div className={`flex items-center gap-3 flex-shrink-0 ${isIPhone ? 'w-auto' : 'w-[120px] md:w-[160px]'}`}>
           <button 
             onClick={toggleMute}
             className="text-muted-foreground hover:text-foreground transition-colors"
+            title={isIPhone ? "Silenciar" : "Volumen"}
           >
-            {isMuted || volume[0] === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            {isMuted || (!isIPhone && volume[0] === 0) ? <VolumeX size={24} /> : <Volume2 size={24} />}
           </button>
-          <Slider 
-            value={isMuted ? [0] : volume} 
-            onValueChange={handleVolume} 
-            max={100} 
-            step={1} 
-            className="cursor-pointer"
-          />
+          
+          {!isIPhone && (
+            <Slider 
+              value={isMuted ? [0] : volume} 
+              onValueChange={handleVolume} 
+              max={100} 
+              step={1} 
+              className="cursor-pointer"
+            />
+          )}
         </div>
 
       </div>

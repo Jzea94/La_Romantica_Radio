@@ -32,12 +32,17 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    
   }
 }
 
 /* 3. Utilidades Personalizadas (Aquí vive la magia visual) */
-@utility glass {
-  @apply bg-card/60 backdrop-blur-xl border border-glass-border rounded-xl;
+@utility glass { 
+  @apply bg-card/100 backdrop-blur-xl
+}
+
+@utility glass-menu { 
+  @apply bg-card/10 backdrop-blur-xl
 }
 
 @utility neon-glow {
@@ -49,18 +54,16 @@
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  10% { transform: translateX(0); } /* Pausa inicial */
-  90% { transform: translateX(-100%); }
-  100% { transform: translateX(-100%); }
+  0%, 15% { transform: translateX(0); }
+  85%, 100% { transform: translateX(calc(100% - 40cqw)); }
 }
 
 .animate-marquee {
   display: inline-block;
   white-space: nowrap;
-  animation: marquee 10s linear infinite;
-  /* El padding asegura que el texto no se pegue al final */
-  padding-right: 2rem;
+  /* cqh/cqw permite que el keyframe conozca el ancho del contenedor */
+  container-type: size; 
+  animation: marquee 8s ease-in-out infinite alternate;
 }
 
 .pause-marquee:hover {
