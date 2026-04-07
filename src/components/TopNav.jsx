@@ -8,12 +8,12 @@ const navItems = [
 
 const TopNav = ({ active, onNavigate }) => {
   return (
-    <header className="sticky top-0 z-50 glass border-b border-border">
+    <header className="sticky top-0 z-50 glass-menu border-b border-border">
       <div className="container mx-auto px-25 flex items-center justify-between h-16">
         <div className="flex items-center gap-2">
           <Radio className="w-6 h-6 text-primary" />
           <span className="font-display font-bold text-lg neon-text">
-            Salsa Romántica FM
+            La Romántica Radio
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-1">

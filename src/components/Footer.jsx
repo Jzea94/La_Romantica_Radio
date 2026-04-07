@@ -10,13 +10,13 @@ const socialLinks = [
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border bg-background/80 backdrop-blur-md">
-      <div className="container py-10 space-y-8">
+    <footer className="border-t border-border px-[13%] bg-background/80 backdrop-blur-md">
+      <div className="py-10 space-y-8">
         {/* Brand */}
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2">
             <Radio className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-lg neon-text">Salsa Romántica FM</span>
+            <span className="font-display font-bold text-lg neon-text">La Romántica Radio</span>
           </div>
           <p className="text-sm text-muted-foreground text-center max-w-sm">
             Tu estación de salsa romántica 24/7. Escucha los clásicos y lo nuevo del género.
