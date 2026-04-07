@@ -7,6 +7,7 @@ import BottomNav from './BottomNav'
 
 const MainLayout = () => {
   const [activeSection, setActiveSection] = useState("inicio");
+  const [currentTrack, setCurrentTrack] = useState(null);
 
   const handleNavigate = useCallback((section) => {
     setActiveSection(section);
@@ -17,19 +18,32 @@ const MainLayout = () => {
     }
   }, []);
 
+
+  const handleSelectTrack = (track) => {
+    setCurrentTrack(track);
+  };
+
+  const handleBackToLive = () => {
+    setCurrentTrack(null);
+  };
+
   return (
     <div className="flex flex-col min-h-screen pb-32">
       <TopNav />
       
       {/* El contenido de las páginas se renderiza aquí */}
       <main className="grow">
-        <Outlet />
+        <Outlet context={{ handleSelectTrack, activeTrackId: currentTrack?.id }} />
       </main>
 
       <Footer />
 
       <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-50 px-2">
-        <AudioPlayer streamUrl={"https://stream.zeno.fm/qhefwzwt8qetv"}/>
+        <AudioPlayer 
+          streamUrl="https://stream.zeno.fm/qhefwzwt8qetv"
+          currentTrack={currentTrack}
+          onBackToLive={handleBackToLive}
+        />
       </div>
 
       <BottomNav active={activeSection} onNavigate={handleNavigate} />

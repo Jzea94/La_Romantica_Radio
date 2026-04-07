@@ -11,6 +11,7 @@
   --color-card: hsl(240 6% 10%);
   --color-card-foreground: hsl(0 0% 95%);
   --color-primary: hsl(330 100% 60%);
+  --color-secundary: hsl(320 100% 60%/0.4);
   --color-primary-foreground: hsl(0 0% 100%);
   --color-border: hsl(240 6% 20%);
   --color-muted: hsl(240 5% 18%);
@@ -33,6 +34,34 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
     
+  }
+}
+
+@layer components {
+  .top-song-row {
+    @apply flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 
+           bg-card/40 border border-transparent cursor-pointer relative overflow-hidden;
+  }
+  .top-first-song-row {
+    @apply shadow-[0_0_15px_rgba(255,46,126,0.5)] border border-secundary;
+  }
+
+  /* Clase para cuando la canción está seleccionada (borde rosa) */
+  .top-song-row.active {
+    @apply border-primary bg-card/60;
+  }
+
+  .rank-badge {
+    @apply w-8 h-8 rounded-full flex items-center justify-center 
+           text-white font-bold text-base flex-shrink-0;
+  }
+
+  .waveform-container {
+    @apply flex items-center gap-0.5 h-4;
+  }
+
+  .waveform-bar {
+    @apply w-0.5 bg-primary rounded-full animate-pulse;
   }
 }
 

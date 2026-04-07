@@ -1,42 +1,75 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Radio } from "lucide-react";
 import { Slider } from "./ui/slider";
 
-const AudioPlayer = ({ streamUrl }) => {
+const AudioPlayer = ({ streamUrl, currentTrack, onBackToLive }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState([80]);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  
   const [trackInfo, setTrackInfo] = useState({
     title: "Salsa Romántica FM",
     artist: "En Vivo 24/7"
   });
 
-  // Detección de iPhone (iOS bloquea el control de volumen por software)
   const isIPhone = typeof window !== 'undefined' && /iPhone/.test(navigator.userAgent);
-
   const audioRef = useRef(null);
   const titleRef = useRef(null);
   const containerRef = useRef(null);
   const streamId = streamUrl.split('/').pop();
 
-  // 1. Detección de desbordamiento para el Marquee
+  // 1. SINCRONIZACIÓN DE MUTE Y VOLUMEN (Corrección solicitada)
   useEffect(() => {
-    const checkOverflow = () => {
-      if (titleRef.current && containerRef.current) {
-        const isOverflowing = titleRef.current.scrollWidth > containerRef.current.offsetWidth;
-        setShouldAnimate(isOverflowing);
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+      // En iOS el volumen es físico, en otros sistemas aplicamos el estado
+      if (!isIPhone) {
+        audioRef.current.volume = isMuted ? 0 : volume[0] / 100;
+      }
+    }
+  }, [isMuted, volume]);
+
+  // 2. REPRODUCCIÓN AUTOMÁTICA AL CAMBIAR DE TRACK
+  useEffect(() => {
+    if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
+    audio.crossOrigin = "anonymous";
+    audio.preload = "auto";
+
+    const loadAndPlay = async () => {
+      audio.pause();
+      
+      if (currentTrack) {
+        audio.src = currentTrack.audioUrl;
+        setTrackInfo({ title: currentTrack.title, artist: currentTrack.artist });
+      } else {
+        // Al volver al vivo, limpiamos si no está sonando para no consumir datos
+        audio.src = isPlaying ? streamUrl : "";
+        setTrackInfo({ title: "Salsa Romántica FM", artist: "En Vivo 24/7" });
+      }
+
+      // Si hay un track nuevo, forzamos el Play y actualizamos el estado visual
+      if (currentTrack || isPlaying) {
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch (err) {
+          console.error("Autoplay prevent: ", err);
+          setIsPlaying(false);
+        }
       }
     };
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [trackInfo.title]);
 
-  // 2. Metadatos via Zeno FM (SSE)
+    loadAndPlay();
+  }, [currentTrack]);
+
+  // 3. METADATOS SSE (Solo Radio)
   useEffect(() => {
+    if (currentTrack) return;
     const sseUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
     const eventSource = new EventSource(sseUrl);
+
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -47,114 +80,96 @@ const AudioPlayer = ({ streamUrl }) => {
             title: titleParts.join(" - ")?.trim() || artist?.trim()
           });
         }
-      } catch (err) {
-        console.error("Error al procesar metadatos:", err);
-      }
+      } catch (err) { console.error("Metadata error:", err); }
     };
-    eventSource.onerror = () => eventSource.close();
-    return () => eventSource.close();
-  }, [streamId]);
 
-  // 3. Lógica de Audio
+    return () => eventSource.close();
+  }, [streamId, currentTrack]);
+
+  // 4. LÓGICA DE CONTROLES
   const togglePlay = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(streamUrl);
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      audioRef.current.pause();
-      audioRef.current.src = ""; 
-      audioRef.current = null; 
+      audio.pause();
+      if (!currentTrack) audio.src = ""; 
       setIsPlaying(false);
     } else {
-      audioRef.current.src = streamUrl;
-      // En iPhone, el volumen siempre es 1 (control físico obligatorio)
-      audioRef.current.volume = isIPhone ? 1 : (isMuted ? 0 : volume[0] / 100);
-      audioRef.current.play().catch(console.error);
+      if (!currentTrack) audio.src = streamUrl;
+      audio.play().catch(console.error);
       setIsPlaying(true);
     }
   };
 
-  const handleVolume = (newVal) => {
-    setVolume(newVal);
-    const muted = newVal[0] === 0;
-    setIsMuted(muted);
-    if (audioRef.current && !isIPhone) {
-      audioRef.current.volume = muted ? 0 : newVal[0] / 100;
-    }
-  };
-
-  const toggleMute = () => {
-    const nextMute = !isMuted;
-    setIsMuted(nextMute);
-    if (audioRef.current) {
-      // El iPhone sí respeta la propiedad .muted aunque bloquee el .volume
-      audioRef.current.muted = nextMute;
-      if (!isIPhone) audioRef.current.volume = nextMute ? 0 : volume[0] / 100;
-    }
+  const handleVolume = (v) => {
+    setVolume(v);
+    if (v[0] === 0) setIsMuted(true);
+    else if (isMuted) setIsMuted(false);
   };
 
   return (
-    <div className="glass border rounded-xl p-4 shadow-2xl backdrop-blur-md max-w-4xl mx-auto w-full">
+    <div className="glass border rounded-2xl p-4 shadow-2xl backdrop-blur-md max-w-4xl mx-auto w-full border-white/10">
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
         
-        {/* COLUMNA 1: Play/Pause */}
+        {/* Play Button */}
         <div className="flex-shrink-0">
           <button 
             onClick={togglePlay}
-            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,46,126,0.4)]"
+            className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white hover:scale-105 transition-all shadow-neon"
           >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
+            {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
           </button>
         </div>
 
-        {/* COLUMNA 2: Info de la canción */}
-        <div className="min-w-0 flex flex-col justify-center space-y-0.5">
+        {/* Track Info & Back to Live Button */}
+        <div className="min-w-0 flex flex-col justify-center">
           <div className="overflow-hidden relative w-full" ref={containerRef}>
-            <p 
-              ref={titleRef}
-              className={`inline-block text-sm font-bold neon-text whitespace-nowrap ${
-                shouldAnimate ? "animate-marquee hover:pause-marquee" : ""
-              }`}
-            >
+            <p ref={titleRef} className={`inline-block text-base font-bold neon-text whitespace-nowrap ${shouldAnimate ? "animate-marquee" : ""}`}>
               {trackInfo.title}
             </p>
           </div>
-          <p className="text-xs text-muted-foreground truncate italic">
-            {trackInfo.artist}
-          </p>
-          <div className="h-4 mt-1">
-            {isPlaying && (
-              <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#ff2e7e]" />
-                <span className="text-[10px] uppercase tracking-wider font-medium text-primary/80">
-                  En vivo
-                </span>
+          
+          <div className="flex flex-col items-start">
+            <p className="text-xs text-muted-foreground truncate italic">{trackInfo.artist}</p>           
+          </div>
+
+          <div className="">
+            {/* Ajuste: Botón de retorno debajo del artista */}
+            {currentTrack && (
+              <button 
+                onClick={onBackToLive}
+                className="mt-1 flex items-center gap-1 text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-full hover:bg-primary/30 transition-all border border-primary/20 animate-in slide-in-from-left-2"
+              >
+                <Radio size={10} /> Volver al LIVE
+              </button>
+            )}
+            {isPlaying && !currentTrack && (
+              <div className="flex items-center gap-1.5 opacity-80">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] uppercase tracking-widest font-bold text-primary">Live Stream</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* COLUMNA 3: Volumen (Oculta slider en iPhone) */}
-        <div className={`flex items-center gap-3 flex-shrink-0 ${isIPhone ? 'w-auto' : 'w-[120px] md:w-[160px]'}`}>
+        {/* Volume Controls */}
+        <div className={`flex items-center gap-3 ${isIPhone ? 'w-auto' : 'w-[120px] md:w-[160px]'}`}>
           <button 
-            onClick={toggleMute}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title={isIPhone ? "Silenciar" : "Volumen"}
+            onClick={() => setIsMuted(!isMuted)} 
+            className="text-muted-foreground hover:text-primary transition-colors"
           >
-            {isMuted || (!isIPhone && volume[0] === 0) ? <VolumeX size={24} /> : <Volume2 size={24} />}
+            {isMuted || volume[0] === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
           </button>
-          
           {!isIPhone && (
             <Slider 
               value={isMuted ? [0] : volume} 
               onValueChange={handleVolume} 
               max={100} 
               step={1} 
-              className="cursor-pointer"
             />
           )}
         </div>
-
       </div>
     </div>
   );
