@@ -71,7 +71,7 @@
 }
 
 @utility glass-menu { 
-  @apply bg-card/10 backdrop-blur-xl
+  @apply bg-card/30 backdrop-blur-lg
 }
 
 @utility neon-glow {

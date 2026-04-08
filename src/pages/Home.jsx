@@ -16,7 +16,7 @@ const Home = () => {
       </section>
 
       {/* SECCIÓN DE CONTENIDO: Aquí iría tu Top de canciones o noticias */}
-      <section id="top" className="container mx-auto scroll-mt-20 px-4">
+      <section className="container mx-auto scroll-mt-20 px-4">
         <div className="glass rounded-3xl py-8 px-5 shadow-xl max-w-4xl mx-auto w-full mt-8 border border-white/5">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <span className="w-2 h-8 bg-primary rounded-full" />

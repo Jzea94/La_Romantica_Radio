@@ -18,7 +18,6 @@ const MainLayout = () => {
     }
   }, []);
 
-
   const handleSelectTrack = (track) => {
     setCurrentTrack(track);
   };
@@ -46,7 +45,7 @@ const MainLayout = () => {
         />
       </div>
 
-      <BottomNav active={activeSection} onNavigate={handleNavigate} />
+      <BottomNav />
     </div>
   );
 };

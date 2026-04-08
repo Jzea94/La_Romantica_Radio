@@ -9,8 +9,8 @@ const TopSongs = () => {
   const { handleSelectTrack, activeTrackId } = useOutletContext();
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto w-full p-10 text-center animate-pulse text-muted-foreground">
-      Cargando el Top 10...
+    <div className="flex justify-center p-20">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
     </div>
   );
 
@@ -32,6 +32,7 @@ const TopSongs = () => {
             onClick={() => handleSelectTrack(song)}
             className={`top-song-row group transition-all ${isActive ? 'active' : ''} ${index === 0 ? 'top-first-song-row' : ''}`}
           >
+
             {/* 1. RANKING */}
             <div className="rank-badge">
               {index + 1}
