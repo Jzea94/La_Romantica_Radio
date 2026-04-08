@@ -34,7 +34,7 @@ const AudioPlayer = ({ streamUrl, currentTrack, onBackToLive }) => {
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
         
         {/* Play/Pause */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <button 
             onClick={togglePlay}
             className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white hover:scale-105 transition-all shadow-neon"
@@ -73,7 +73,7 @@ const AudioPlayer = ({ streamUrl, currentTrack, onBackToLive }) => {
         </div>
 
         {/* Volumen */}
-        <div className={`flex items-center gap-3 ${isIPhone ? 'w-auto' : 'w-[120px] md:w-[160px]'}`}>
+        <div className={`flex items-center gap-3 ${isIPhone ? 'w-auto' : 'w-30 md:w-40'}`}>
           <button onClick={() => setIsMuted(!isMuted)} className="text-muted-foreground hover:text-primary transition-colors">
             {isMuted || volume[0] === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
           </button>

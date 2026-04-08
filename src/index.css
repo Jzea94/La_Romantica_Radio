@@ -53,7 +53,7 @@
 
   .rank-badge {
     @apply w-8 h-8 rounded-full flex items-center justify-center 
-           text-white font-bold text-base flex-shrink-0;
+           text-white font-bold text-base shrink-0;
   }
 
   .waveform-container {
@@ -67,7 +67,7 @@
 
 /* 3. Utilidades Personalizadas (Aquí vive la magia visual) */
 @utility glass { 
-  @apply bg-card/100 backdrop-blur-xl
+  @apply bg-card backdrop-blur-xl
 }
 
 @utility glass-menu { 

@@ -39,7 +39,7 @@ const TopSongs = () => {
             </div>
 
             {/* 2. PORTADA (Thumbnail) */}
-            <div className="w-12 h-12 rounded-xl bg-background/50 flex items-center justify-center flex-shrink-0 border border-white/5 overflow-hidden">
+            <div className="w-12 h-12 rounded-xl bg-background/50 flex items-center justify-center shrink-0 border border-white/5 overflow-hidden">
               {song.album_art ? (
                 <img src={song.album_art} alt={song.title} className="w-full h-full object-cover" />
               ) : (

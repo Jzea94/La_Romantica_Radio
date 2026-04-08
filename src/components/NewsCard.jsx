@@ -11,7 +11,7 @@ const NewsCard = ({ item }) => {
   return (
     <Link 
       to={`/noticias/${item.id}`}
-      className="group relative block w-full aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 bg-black transition-transform duration-300 hover:scale-[1.02]"
+      className="group relative block w-full aspect-16/10 rounded-2xl overflow-hidden border border-white/10 bg-black transition-transform duration-300 hover:scale-[1.02]"
     >
       {/* Imagen de fondo con Filtros de Legibilidad */}
       <div className="absolute inset-0">
@@ -23,7 +23,7 @@ const NewsCard = ({ item }) => {
         />
         
         {/* Scrim (Capa de protección de texto) de tres niveles */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/80 to-transparent" />
       </div>
 
       {/* Contenido de la Card */}
