@@ -1,5 +1,5 @@
 import { Search, ListMusic } from "lucide-react";
-import MusicStore from "@/components/MusicStore";
+import MusicStore from "@/components/TrackList";
 
 const Music = () => {
   return (

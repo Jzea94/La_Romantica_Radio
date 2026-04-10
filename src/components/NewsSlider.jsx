@@ -1,9 +1,8 @@
-// src/components/NewsSlider.jsx
 import { useEffect, useState } from 'react';
-import { useNews } from '../hooks/useNews';
-import NewsCard from './NewsCard';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useNews } from '../hooks/useNews';
+import NewsCard from './NewsCard';
 
 const NewsSlider = () => {
   const { getLatestNews, loading } = useNews();
