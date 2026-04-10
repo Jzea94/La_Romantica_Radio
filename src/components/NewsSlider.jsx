@@ -20,7 +20,7 @@ const NewsSlider = () => {
   if (loading) return (
     <section className="py-8 max-w-7xl mx-auto px-4 md:px-0">
       <div className="h-8 w-48 bg-white/5 animate-pulse rounded-lg mb-6" />
-      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-4 h-[500px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-4 h-125">
         <div className="md:col-span-2 md:row-span-2 bg-white/5 animate-pulse rounded-2xl border border-white/5" />
         <div className="bg-white/5 animate-pulse rounded-2xl border border-white/5" />
         <div className="bg-white/5 animate-pulse rounded-2xl border border-white/5" />

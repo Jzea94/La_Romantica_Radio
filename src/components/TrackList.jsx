@@ -79,7 +79,7 @@ const MusicStore = () => {
               {isActive && (
                 <div className="pr-4">
                   <div className="flex gap-0.5 h-3 items-end">
-                    <span className="w-0.5 h-full bg-primary animate-[bounce_1s_infinite]" />
+                    <span className="w-0.5 h-full bg-primary animate-bounce" />
                     <span className="w-0.5 h-2/3 bg-primary animate-[bounce_1.2s_infinite]" />
                     <span className="w-0.5 h-full bg-primary animate-[bounce_0.8s_infinite]" />
                   </div>
