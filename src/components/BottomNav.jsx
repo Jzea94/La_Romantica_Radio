@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
 import { Home, Newspaper, Music } from "lucide-react";
 
@@ -7,9 +8,13 @@ const navItems = [
   { path: "/musica", label: "Musica", icon: Music },
 ];
 
-const BottomNav = () => {
+// Usamos forwardRef para permitir que MainLayout mida este elemento
+const BottomNav = forwardRef((props, ref) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50  md:hidden glass-menu">
+    <nav 
+      ref={ref} 
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-menu"
+    >
       <div className="flex items-center justify-around mb-5 mt-1 h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -29,15 +34,15 @@ const BottomNav = () => {
               <span className="text-[10px] font-medium tracking-wide">
                 {item.label}
               </span>
-              
-              {/* Indicador visual activo (opcional) */}
-              <div className="active-indicator h-1 w-1 rounded-full bg-primary opacity-0 transition-opacity" />
             </NavLink>
           );
         })}
       </div>
     </nav>
   );
-};
+});
+
+// Asignamos un nombre para facilitar la depuración en React DevTools
+BottomNav.displayName = "BottomNav";
 
 export default BottomNav;

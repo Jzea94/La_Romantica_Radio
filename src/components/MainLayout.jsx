@@ -1,21 +1,26 @@
-import { useState, useCallback } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { Outlet } from 'react-router-dom';
 import TopNav from './TopNav';
 import Footer from './Footer';
-import AudioPlayer from './AudioPlayer';
-import BottomNav from './BottomNav'
+import AudioPlayer from './AudioPlayerr';
+import BottomNav from './BottomNav';
 
 const MainLayout = () => {
-  const [activeSection, setActiveSection] = useState("inicio");
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [navHeight, setNavHeight] = useState(0);
+  const navRef = useRef(null);
 
-  const handleNavigate = useCallback((section) => {
-    setActiveSection(section);
-    if (section !== "inicio") {
-      document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+  // Funciones de navegación que serán inyectadas por el MusicStore
+  const [navigation, setNavigation] = useState({ next: null, prev: null });
+
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (navRef.current) setNavHeight(navRef.current.offsetHeight);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
   }, []);
 
   const handleSelectTrack = (track) => {
@@ -24,28 +29,38 @@ const MainLayout = () => {
 
   const handleBackToLive = () => {
     setCurrentTrack(null);
+    setNavigation({ next: null, prev: null }); // Limpiamos navegación al volver al live
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-32">
+    <div className="flex flex-col min-h-screen">
       <TopNav />
-      
-      {/* El contenido de las páginas se renderiza aquí */}
       <main className="grow">
-        <Outlet context={{ handleSelectTrack, activeTrackId: currentTrack?.id }} />
+        <Outlet context={{ 
+          handleSelectTrack, 
+          activeTrackId: currentTrack?.id,
+          setIsExpanded,
+          setNavigation // Permitimos que MusicStore pase sus funciones de Next/Prev
+        }} />
       </main>
-
       <Footer />
 
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-50 px-2">
+      <div 
+        className={`fixed left-0 right-0 transition-all duration-500 ease-in-out px-2
+          ${isExpanded ? "inset-0 p-0 z-100" : "z-50"}`}
+        style={!isExpanded ? { bottom: `calc(${navHeight}px)`} : {}}
+      >
         <AudioPlayer 
           streamUrl="https://stream.zeno.fm/qhefwzwt8qetv"
           currentTrack={currentTrack}
           onBackToLive={handleBackToLive}
+          onNext={navigation.next} // Pasamos la función al reproductor
+          onPrevious={navigation.prev} // Pasamos la función al reproductor
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
         />
       </div>
-
-      <BottomNav />
+      <BottomNav ref={navRef} />
     </div>
   );
 };

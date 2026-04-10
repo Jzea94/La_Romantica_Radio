@@ -4,7 +4,7 @@ import MainLayout from '@/components/MainLayout';
 import Home from '@/pages/Home';
 import NewsPage from '@/pages/News';
 import NewsDetail from '@/pages/NewsDetail';
-import TopSongs from '@/pages/TopSongs';
+import Music from '@/pages/Music';
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
             <Route index element={<Home />} />          
             <Route path="noticias" element={<NewsPage />} />
             <Route path="noticias/:id" element={<NewsDetail />} />          
-            <Route path="top" element={<TopSongs />} />
+            <Route path="musica" element={<Music />} />
             {/* <Route path="*" element={<div>Página no encontrada</div>} /> */}          
           </Route>
         </Routes>

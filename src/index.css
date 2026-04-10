@@ -8,7 +8,7 @@
   /* Colores de Lovable / shadcn */
   --color-background: hsl(240 10% 4%);
   --color-foreground: hsl(0 0% 95%);
-  --color-card: hsl(240 6% 10%);
+  --color-card: hsl(240 6% 5%);
   --color-card-foreground: hsl(0 0% 95%);
   --color-primary: hsl(330 100% 60%);
   --color-secundary: hsl(320 100% 60%/0.4);
@@ -71,7 +71,7 @@
 }
 
 @utility glass-menu { 
-  @apply bg-card/30 backdrop-blur-lg
+  @apply bg-card/80 backdrop-blur-xs
 }
 
 @utility neon-glow {
@@ -82,19 +82,41 @@
   text-shadow: 0 0 10px var(--neon-glow-color), 0 0 40px color-mix(in srgb, var(--neon-glow-color) 20%, transparent);
 }
 
-@keyframes marquee {
-  0%, 15% { transform: translateX(0); }
-  85%, 100% { transform: translateX(calc(100% - 40cqw)); }
+/* Utilidad para ocultar scrollbars pero mantener funcionalidad */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
-.animate-marquee {
-  display: inline-block;
-  white-space: nowrap;
-  /* cqh/cqw permite que el keyframe conozca el ancho del contenedor */
-  container-type: size; 
-  animation: marquee 8s ease-in-out infinite alternate;
-}
+/* src/index.css */
+@layer utilities {
+  .bg-hero-atmosphere {
+    background: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 45, 138, 0.2),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 120, 60, 0.15),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(120, 60, 255, 0.1),
+      transparent 50%
+    );
+    background-color: #0b0b0f;
+  }
 
-.pause-marquee:hover {
-  animation-play-state: paused;
+  /* Máscara para suavizar la transición inferior del Hero */
+  .mask-fade-bottom {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
 }

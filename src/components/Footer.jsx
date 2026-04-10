@@ -10,7 +10,7 @@ const socialLinks = [
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border px-[13%] bg-background/80 backdrop-blur-md">
+    <footer className="border-t border-border mb-33 px-[13%] bg-background/80 backdrop-blur-md">
       <div className="py-10 space-y-8">
         {/* Brand */}
         <div className="flex flex-col items-center gap-2">

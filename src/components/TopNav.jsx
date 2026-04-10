@@ -3,8 +3,8 @@ import { Radio } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Inicio" },
-  { path: "/top", label: "Top Canciones" },
   { path: "/noticias", label: "Noticias" },
+  { path: "/musica", label: "Musica" },
 ];
 
 const TopNav = () => {
